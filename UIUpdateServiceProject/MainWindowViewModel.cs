@@ -19,6 +19,10 @@ namespace UIUpdateServiceProject
                 Task.Delay(1000).Wait();
 
                 UIUpdateService.Instance.UpdateField(this, nameof(Text), System.Windows.Media.Brushes.Red);
+
+                Task.Delay(1000).Wait();
+
+                UIUpdateService.Instance.ResetField(this, nameof(Text));
             });
         }
     }

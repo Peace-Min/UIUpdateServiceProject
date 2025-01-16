@@ -38,6 +38,63 @@ namespace UIUpdateServiceProject
             }
         }
 
+        private FrameworkElement FindElementByBindingPath(DependencyObject parent, string bindingPath)
+        {
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
+            {
+                var child = VisualTreeHelper.GetChild(parent, i);
+
+                if (child is FrameworkElement element)
+                {
+                    var bindingExpression = element.GetBindingExpression(TextBox.TextProperty);
+                    if (bindingExpression != null && bindingExpression.ParentBinding.Path.Path == bindingPath)
+                    {
+                        return element;
+                    }
+                }
+
+                var result = FindElementByBindingPath(child, bindingPath);
+                if (result != null)
+                    return result;
+            }
+
+            return null;
+        }
+
+        private IEnumerable<TextBox> GetAllTextBoxes(DependencyObject parent)
+        {
+            if (parent == null)
+                yield break;
+
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
+            {
+                var child = VisualTreeHelper.GetChild(parent, i);
+
+                if (child is TextBox textBox)
+                {
+                    yield return textBox;
+                }
+                else
+                {
+                    foreach (var descendant in GetAllTextBoxes(child))
+                    {
+                        yield return descendant;
+                    }
+                }
+            }
+        }
+
+        private void ResetTextBoxesInView(FrameworkElement view)
+        {
+            foreach (var textBox in GetAllTextBoxes(view))
+            {
+                if (!Equals(textBox.Background, SystemColors.WindowBrush)) // 기본값과 다른 경우
+                {
+                    textBox.Background = SystemColors.WindowBrush; // 기본값으로 복원
+                }
+            }
+        }
+
         private UIUpdateService() { }
 
         public void RegisterView(FrameworkElement view)
@@ -66,27 +123,30 @@ namespace UIUpdateServiceProject
             }
         }
 
-        private FrameworkElement FindElementByBindingPath(DependencyObject parent, string bindingPath)
+        public void ResetField(INotifyPropertyChanged viewModel, string fieldName)
         {
-            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
+            if (_viewMappings.TryGetValue(viewModel, out var view))
             {
-                var child = VisualTreeHelper.GetChild(parent, i);
-
-                if (child is FrameworkElement element)
+                Application.Current.Dispatcher.Invoke(() =>
                 {
-                    var bindingExpression = element.GetBindingExpression(TextBox.TextProperty);
-                    if (bindingExpression != null && bindingExpression.ParentBinding.Path.Path == bindingPath)
+                    var targetElement = FindElementByBindingPath(view, fieldName);
+                    if (targetElement is TextBox textBox)
                     {
-                        return element;
+                        textBox.Background = default;
                     }
-                }
-
-                var result = FindElementByBindingPath(child, bindingPath);
-                if (result != null)
-                    return result;
+                });
             }
+        }
 
-            return null;
+        public void ResetAllTextBoxes(INotifyPropertyChanged viewModel)
+        {
+            if (_viewMappings.TryGetValue(viewModel, out var view))
+            {
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    ResetTextBoxesInView(view);
+                });
+            }
         }
     }
 }
