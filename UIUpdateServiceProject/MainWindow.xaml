@@ -1,12 +1,21 @@
 ﻿<Window x:Class="UIUpdateServiceProject.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:UIUpdateServiceProject"
-        mc:Ignorable="d"
+        xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
         Title="MainWindow" Height="450" Width="800">
     <Grid>
-        <TextBox x:Name="txtBox"  HorizontalAlignment="Left" Height="23" Margin="10,10,0,0" TextWrapping="Wrap" Text="{Binding Text}" VerticalAlignment="Top" Width="120"/>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+
+        <TabControl Grid.Column="0">
+            <TabItem Header="A" PreviewMouseDown="TabItem_PreviewMouseDown"/>
+            <TabItem Header="B" PreviewMouseDown="TabItem_PreviewMouseDown"/>
+            <TabItem Header="C" PreviewMouseDown="TabItem_PreviewMouseDown"/>
+        </TabControl>
+        
+        <ToggleButton Grid.Column="1" x:Name="btnState" Width="150" Height="80" Content="Can't Index Changed" IsChecked="{Binding IsButtonEnabled}"></ToggleButton>
     </Grid>
 </Window>
